@@ -1,4 +1,4 @@
-# JAWS-UG 支部ロゴ・神経衰弱ゲーム
+# JAWS-UG 支部ロゴ・神経衰弱ゲーム - Amplify 版
 
 ![ゲーム画面](https://img.shields.io/badge/Game-Memory%20Card-blue)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)

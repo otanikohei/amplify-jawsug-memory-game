@@ -35,9 +35,9 @@ export class CustomResources extends Construct {
     });
 
     // Lambda に権限 & 環境変数を付与
-    table.grantReadWriteData(backend.resources.scoresFn.resources.lambda);
-    backend.resources.scoresFn.resources.lambda.addEnvironment('TABLE_NAME', table.tableName);
-    backend.resources.scoresFn.resources.lambda.addEnvironment('GSI1_NAME', 'gsi1');
+    table.grantReadWriteData(backend.scoresFn.resources.lambda);
+    backend.scoresFn.resources.lambda.addEnvironment('TABLE_NAME', table.tableName);
+    backend.scoresFn.resources.lambda.addEnvironment('GSI1_NAME', 'gsi1');
 
     // REST API
     const api = new RestApi(this, 'ScoresApi', {
@@ -50,7 +50,7 @@ export class CustomResources extends Construct {
     });
 
     const scores = api.root.addResource('scores');
-    const integ = new LambdaIntegration(backend.resources.scoresFn.resources.lambda);
+    const integ = new LambdaIntegration(backend.scoresFn.resources.lambda);
     scores.addMethod('GET', integ);
     scores.addMethod('POST', integ);
 
