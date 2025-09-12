@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="神経衰弱ゲーム - カードをめくって同じペアを見つけるメモリーゲーム">
+    <title>JAWS-UG 支部ロゴ・神経衰弱ゲーム</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Dela+Gothic+One&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+<!-- カウントダウン表示用 -->
+<div id="countdown-overlay" class="countdown hidden"></div>
+
+    <div class="container">
+        <!-- ヘッダー部分 -->
+        <header class="game-header">
+            <h1 id="game-title">JAWS-UG 支部ロゴ・神経衰弱ゲーム</h1>
+            <div class="game-controls">
+                <!-- 名前入力欄を追加 -->
+                <div id="players-name" class="player-name-input">
+                    <label for="player-name">名前:</label>
+                    <input type="text" id="player-name" placeholder="お名前を入力">
+                </div>
+                <div class="game-info">
+                    <span id="timer-display" class="timer">Timer: 05:00</span>
+                    <span id="score-display" class="score">Score: 0/16</span>
+                </div>
+                <button id="start-btn" class="start-button">START</button>
+            </div>
+        </header>
+
+        <!-- ゲームエリア -->
+        <main class="game-area">
+            <div id="card-grid" class="card-grid hidden">
+                <!-- カードは JavaScript で動的に生成される -->
+            </div>
+        </main>
+
+        <!-- ランキング表示エリア -->
+        <section id="ranking-area" class="ranking-section">
+            <h2>ランキング</h2>
+            <div id="ranking-display" class="ranking-list">
+                <!-- ランキングは JavaScript で動的に生成される -->
+            </div>
+        </section>
+
+        <!-- ゲーム終了モーダル -->
+        <div id="game-end-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="game-result-title">ゲーム終了</h2>
+                <div id="game-result-details" class="result-details">
+                    <!-- 結果詳細は JavaScript で動的に生成される -->
+                </div>
+                <button id="play-again-btn" class="play-again-button">もう一度プレイ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
