@@ -1,0 +1,13 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands: []
+    build:
+      commands: []   # 何もビルドしない（静的ファイルそのまま）
+  artifacts:
+    baseDirectory: / # ルート直下の index.html などを配信
+    files:
+      - '**/*'
+  cache:
+    paths: []
