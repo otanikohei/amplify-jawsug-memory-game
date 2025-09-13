@@ -443,11 +443,11 @@ class CardManager {
       cardDiv.dataset.gridIndex = String(card.position.index);
     }
 
-    // 初期状態で front-face.png を表示、裏は 01.png〜 の画像
+    // 初期状態で front-face.v1.png を表示、裏は 01.png〜 の画像
     cardDiv.innerHTML = `
       <div class="card-inner">
         <div class="card-front">
-          <img src="images/front-face.png" alt="カード表面"
+          <img src="images/front-face.v1.png" alt="カード表面"
                onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#74b9ff,#0984e3)'">
         </div>
         <div class="card-back">

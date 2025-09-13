@@ -10,7 +10,7 @@
 body {
     font-family: 'Arial', 'Hiragino Sans', 'Yu Gothic', sans-serif;
     background: linear-gradient(135deg, #d2c9a4 0%, #b4ae8d 100%);
-    background-image: url('./images/background-image.png');
+    background-image: url('./images/background-image.v1.png');
     min-height: 100vh;
     color: #333;
 }

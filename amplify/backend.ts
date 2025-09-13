@@ -1,61 +1,71 @@
-import { defineBackend } from '@aws-amplify/backend';
-import { RemovalPolicy, CfnOutput } from 'aws-cdk-lib';
-import { AttributeType, BillingMode, ProjectionType, Table } from 'aws-cdk-lib/aws-dynamodb';
-import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
-import { scoresFn } from './functions/scores/resource';
-import { storage } from './storage/resource';
+// 先頭の import 群に追加
+import { Bucket, BlockPublicAccess } from 'aws-cdk-lib/aws-s3';
+import {
+  Distribution,
+  ViewerProtocolPolicy,
+  AllowedMethods,
+  PriceClass,
+  CachePolicy,
+  ResponseHeadersPolicy,
+  OriginAccessIdentity,
+} from 'aws-cdk-lib/aws-cloudfront';
+import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { Duration } from 'aws-cdk-lib';
 
-export const backend = defineBackend({ scoresFn });
+// === ここから追記（api/db の定義はそのまま）===
 
-/**
- * スタック構成：
- *   dbStack   … DynamoDB（← Function スタックが参照）
- *   apiStack  … API Gateway（← Function スタックを参照）
- *   function  … scoresFn（デフォルトの関数スタック）
- */
+// 画像配信専用スタック
+const cdnStack = backend.createStack('cdn');
 
-// --- DB スタック（DynamoDB だけ置く）---
-const dbStack = backend.createStack('db');
-
-const table = new Table(dbStack, 'ScoresTable', {
-  partitionKey: { name: 'id', type: AttributeType.STRING },
-  billingMode: BillingMode.PAY_PER_REQUEST,
-  removalPolicy: RemovalPolicy.RETAIN,
+// 画像用 S3（非公開／CloudFront からのみ読める）
+const imagesBucket = new Bucket(cdnStack, 'ImagesBucket', {
+  blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+  enforceSSL: true,
+  removalPolicy: RemovalPolicy.RETAIN, // 検証用なら DESTROY でもOK
 });
 
-table.addGlobalSecondaryIndex({
-  indexName: 'gsi1',
-  partitionKey: { name: 'gsi1pk', type: AttributeType.STRING },
-  sortKey: { name: 'score', type: AttributeType.NUMBER },
-  projectionType: ProjectionType.ALL,
+// CloudFront の OAI（Origin Access Identity）
+const oai = new OriginAccessIdentity(cdnStack, 'ImagesOAI');
+
+// CloudFront キャッシュポリシー（1年）
+const oneYear = Duration.days(365);
+const imagesCache = new CachePolicy(cdnStack, 'ImagesCachePolicy', {
+  defaultTtl: oneYear,
+  maxTtl: oneYear,
+  minTtl: Duration.seconds(0),
+  enableAcceptEncodingGzip: true,
+  enableAcceptEncodingBrotli: true,
 });
 
-// Lambda に権限と環境変数を付与（これは “Function スタック側” にポリシー等が乗る）
-table.grantReadWriteData(backend.scoresFn.resources.lambda);
-backend.scoresFn.addEnvironment('TABLE_NAME', table.tableName);
-backend.scoresFn.addEnvironment('GSI1_NAME', 'gsi1');
-
-// --- API スタック（RestApi だけ置く）---
-const apiStack = backend.createStack('api');
-
-const api = new RestApi(apiStack, 'ScoresApi', {
-  restApiName: 'scores-api',
-  defaultCorsPreflightOptions: {
-    allowOrigins: Cors.ALL_ORIGINS,
-    allowMethods: Cors.ALL_METHODS,
-    allowHeaders: Cors.DEFAULT_HEADERS,
+// （必要なら）レスポンスヘッダ。CORSが不要なら削ってOK
+const imagesHeaders = new ResponseHeadersPolicy(cdnStack, 'ImagesHeaders', {
+  corsBehavior: {
+    accessControlAllowOrigins: ['*'],
+    accessControlAllowHeaders: ['*'],
+    accessControlAllowMethods: ['GET', 'HEAD', 'OPTIONS'],
+    originOverride: true,
   },
 });
 
-const scores = api.root.addResource('scores');
-const scoresInteg = new LambdaIntegration(backend.scoresFn.resources.lambda);
-scores.addMethod('GET',  scoresInteg);
-scores.addMethod('POST', scoresInteg);
+// S3 を CloudFront のオリジンに設定（OAI を付与）
+const imagesOrigin = new S3Origin(imagesBucket, { originAccessIdentity: oai });
 
-// 出力（Amplify Backend → Outputs に出ます）
-new CfnOutput(apiStack, 'ScoresApiId',  { value: api.restApiId });
-new CfnOutput(apiStack, 'ScoresApiUrl', { value: api.url ?? '' });
+// CloudFront ディストリビューション
+const imagesCdn = new Distribution(cdnStack, 'ImagesCdn', {
+  defaultBehavior: {
+    origin: imagesOrigin,
+    allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+    viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+    cachePolicy: imagesCache,
+    responseHeadersPolicy: imagesHeaders,
+  },
+  priceClass: PriceClass.PRICE_CLASS_200, // 予算に合わせて 100/200/ALL
+});
 
-defineBackend({
-  storage
+// 出力（Amplify の Backend → Outputs で参照できる）
+new CfnOutput(cdnStack, 'ImagesBucketName', {
+  value: imagesBucket.bucketName,
+});
+new CfnOutput(cdnStack, 'ImagesCdnUrl', {
+  value: `https://${imagesCdn.distributionDomainName}`, // ← これをフロントのベースURLに使う
 });
