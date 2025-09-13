@@ -14,7 +14,7 @@ const GAME_CONFIG = {
   GRID_COLS: 8,
   GRID_ROWS: 4,
   CARD_FLIP_DELAY: 700,   // ミスマッチ時の裏返し待機(ms)
-  TOTAL_IMAGES: 16        // 用意した画像の最大番号に合わせる（01〜16.png など）
+  TOTAL_IMAGES: 50       // 用意した画像の最大番号に合わせる（01〜16.png など）
 };
 
 // ====== ユーティリティ ======
