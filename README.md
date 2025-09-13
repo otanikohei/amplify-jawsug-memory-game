@@ -103,7 +103,6 @@ jaws-ug-memory-game/
 └── images/                 # 画像リソース
     ├── 01.png - 21.png     # JAWS-UG支部ロゴ画像（21種類）
     ├── front-face.v1.png      # カード表面画像
-    ├── card-front.png      # カード表面背景
     └── background-image.v1.png # ゲーム背景画像
 ```
 

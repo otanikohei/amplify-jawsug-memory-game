@@ -191,7 +191,7 @@ body {
 
 .card-front {
     background: linear-gradient(135deg, #cbcda4, #a9a16c);
-    background-image: url('images/card-front.png');
+    background-image: url('images/front-face.v1.png');
     display: flex;
     align-items: center;
     justify-content: center;

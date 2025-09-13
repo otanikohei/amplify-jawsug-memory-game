@@ -5,6 +5,9 @@
 // ====== API 設定（Amplify の API Gateway の URL を設定）======
 // 例: https://abc123.execute-api.ap-northeast-1.amazonaws.com/prod
 const API_BASE = 'https://s021ys8qh3.execute-api.ap-northeast-1.amazonaws.com/prod/'; // ← 空のままだとローカル保存にフォールバックします
+const IMG_BASE = 'https://d1l9rff2xrb9az.cloudfront.net'; // ← ImagesCdnUrl（末尾スラ無し）
+const frontUrl = `${IMG_BASE}/front-face.png`;
+const backUrl  = (id) => `${IMG_BASE}/${id.toString().padStart(2,'0')}.png`;
 
 // ====== ゲーム設定 ======
 const GAME_CONFIG = {
@@ -447,11 +450,11 @@ class CardManager {
     cardDiv.innerHTML = `
       <div class="card-inner">
         <div class="card-front">
-          <img src="images/front-face.v1.png" alt="カード表面"
+          <img src=${frontUrl} alt="カード表面"
                onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(135deg,#74b9ff,#0984e3)'">
         </div>
         <div class="card-back">
-          <img src="images/${card.imageId.toString().padStart(2,'0')}.png" alt="カード${card.imageId}"
+          <img src="images/${backUrl}.png" alt="カード${card.imageId}"
                onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:2rem;color:#666;\\'>${card.imageId}</div>';">
         </div>
       </div>
