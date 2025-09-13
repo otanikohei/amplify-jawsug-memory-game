@@ -3,6 +3,7 @@ import { RemovalPolicy, CfnOutput } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, ProjectionType, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { scoresFn } from './functions/scores/resource';
+import { storage } from './storage/resource';
 
 export const backend = defineBackend({ scoresFn });
 
@@ -54,3 +55,7 @@ scores.addMethod('POST', scoresInteg);
 // 出力（Amplify Backend → Outputs に出ます）
 new CfnOutput(apiStack, 'ScoresApiId',  { value: api.restApiId });
 new CfnOutput(apiStack, 'ScoresApiUrl', { value: api.url ?? '' });
+
+defineBackend({
+  storage
+});
