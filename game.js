@@ -5,10 +5,19 @@
 // ====== API 設定（Amplify の API Gateway の URL を設定）======
 // 例: https://abc123.execute-api.ap-northeast-1.amazonaws.com/prod/
 const API_BASE = 'https://s021ys8qh3.execute-api.ap-northeast-1.amazonaws.com/prod'; // ← 空のままだとローカル保存にフォールバックします
-const IMG_BASE = 'https://d1l9rff2xrb9az.cloudfront.net'; // ImagesCdnUrl（末尾スラ無し）
-const frontUrl = `${IMG_BASE}/front-face.v1.png`;
-const backUrl  = (id) => `${IMG_BASE}/${id}.v1.png`;
+const IMG_BASE    = 'https://d1l9rff2xrb9az.cloudfront.net'; // ImagesCdnUrl（末尾スラ無し）
+const IMG_PREFIX  = '';      // 例: 'images/' に置いたなら 'images/' にする
+const IMG_VERSION = 'v1';    // 例: バージョン無しなら '' にする
+const USE_PADDED  = false;   // 01.png 形式なら true、1.png 形式なら false
 
+const fileName = (id) => {
+  const n = USE_PADDED ? String(id).padStart(2,'0') : String(id);
+  const v = IMG_VERSION ? `.${IMG_VERSION}` : '';
+  return `${n}${v}.png`;
+};
+const frontUrl = `${IMG_BASE}/${IMG_PREFIX}front-face${IMG_VERSION?'.'+IMG_VERSION:''}.png`;
+const backUrl  = (id) => `${IMG_BASE}/${IMG_PREFIX}${fileName(id)}`;
+const bgUrl    = `${IMG_BASE}/${IMG_PREFIX}background-image${IMG_VERSION?'.'+IMG_VERSION:''}.png`;
 
 // ====== ゲーム設定 ======
 const GAME_CONFIG = {
@@ -621,4 +630,6 @@ let gameController;
 document.addEventListener('DOMContentLoaded', () => {
   gameController = new GameController();
   console.log('神経衰弱ゲーム初期化完了');
+  // CSSの相対パスを無視して CloudFront の背景を強制適用
+  document.body.style.backgroundImage = `url('${bgUrl}')`;
 });
