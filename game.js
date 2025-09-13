@@ -8,7 +8,7 @@ const API_BASE = 'https://s021ys8qh3.execute-api.ap-northeast-1.amazonaws.com/pr
 const IMG_BASE    = 'https://d1l9rff2xrb9az.cloudfront.net'; // ImagesCdnUrl（末尾スラ無し）
 const IMG_PREFIX  = '';      // 例: 'images/' に置いたなら 'images/' にする
 const IMG_VERSION = 'v1';    // 例: バージョン無しなら '' にする
-const USE_PADDED  = false;   // 01.png 形式なら true、1.png 形式なら false
+const USE_PADDED  = true;   // 01.png 形式なら true、1.png 形式なら false
 
 const fileName = (id) => {
   const n = USE_PADDED ? String(id).padStart(2,'0') : String(id);
