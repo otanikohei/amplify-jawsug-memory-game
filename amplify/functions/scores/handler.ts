@@ -1,4 +1,4 @@
-import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
+import { APIGatewayProxyHandler } from 'aws-lambda';
 import { DynamoDBClient, PutItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
 import { randomUUID } from 'node:crypto';
 
@@ -8,21 +8,20 @@ const GSI1_NAME = process.env.GSI1_NAME || 'gsi1';
 
 const ddb = new DynamoDBClient({ region: REGION });
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  // CORS
+export const handler: APIGatewayProxyHandler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   };
-  if (event.requestContext.http.method === 'OPTIONS') {
-    return { statusCode: 200, headers };
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
   }
 
   try {
-    if (event.requestContext.http.method === 'POST' && event.rawPath.endsWith('/scores')) {
+    if (event.httpMethod === 'POST' && event.path?.endsWith('/scores')) {
       const body = JSON.parse(event.body || '{}');
-      const name = String((body.name ?? '')).slice(0, 50);
+      const name = String(body.name ?? '').slice(0, 50);
       const pairs = Number(body.pairs ?? 0);
       const seconds = Number(body.seconds ?? 0);
       const playedAt = body.playedAt ? String(body.playedAt) : new Date().toISOString();
@@ -31,7 +30,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
         return { statusCode: 400, headers, body: JSON.stringify({ message: 'invalid input' }) };
       }
 
-      // ランキング用スコア（高いほど良い）
+      // ランキング用の数値（大きいほど強い）
       const score = pairs * 10000 - seconds;
 
       await ddb.send(new PutItemCommand({
@@ -43,14 +42,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
           seconds:   { N: String(seconds) },
           playedAt:  { S: playedAt },
           score:     { N: String(score) },
-          gsi1pk:    { S: 'RANK' }, // GSIのパーティションキーは固定
+          gsi1pk:    { S: 'RANK' },
         },
       }));
 
       return { statusCode: 201, headers, body: JSON.stringify({ ok: true }) };
     }
 
-    if (event.requestContext.http.method === 'GET' && event.rawPath.endsWith('/scores')) {
+    if (event.httpMethod === 'GET' && event.path?.endsWith('/scores')) {
       const limit = Math.min(100, Math.max(1, Number(event.queryStringParameters?.limit ?? 10)));
 
       const res = await ddb.send(new QueryCommand({
@@ -58,8 +57,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
         IndexName: GSI1_NAME,
         KeyConditionExpression: 'gsi1pk = :pk',
         ExpressionAttributeValues: { ':pk': { S: 'RANK' } },
-        // score 降順
-        ScanIndexForward: false,
+        ScanIndexForward: false, // 降順
         Limit: limit,
       }));
 

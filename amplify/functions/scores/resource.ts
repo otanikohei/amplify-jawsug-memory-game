@@ -3,5 +3,5 @@ import { defineFunction } from '@aws-amplify/backend';
 export const scoresFn = defineFunction({
   name: 'scores-fn',
   entry: './handler.ts',
-  // 必要ならメモリ/タイムアウト等は後で調整できます
+  // environment: { TABLE_NAME: '後で custom から付与', GSI1_NAME: '後で custom から付与' }
 });
