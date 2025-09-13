@@ -14,7 +14,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     'Access-Control-Allow-Headers': '*',
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   };
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
+  }
 
   try {
     if (event.httpMethod === 'POST' && event.path?.endsWith('/scores')) {
@@ -23,10 +25,13 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       const pairs = Number(body.pairs ?? 0);
       const seconds = Number(body.seconds ?? 0);
       const playedAt = body.playedAt ? String(body.playedAt) : new Date().toISOString();
+
       if (!name || !Number.isFinite(pairs) || !Number.isFinite(seconds)) {
         return { statusCode: 400, headers, body: JSON.stringify({ message: 'invalid input' }) };
       }
-      const score = pairs * 10000 - seconds;
+
+      const score = pairs * 10000 - seconds; // 高いほど上位
+
       await ddb.send(new PutItemCommand({
         TableName: TABLE_NAME,
         Item: {
@@ -39,25 +44,29 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           gsi1pk:   { S: 'RANK' },
         },
       }));
+
       return { statusCode: 201, headers, body: JSON.stringify({ ok: true }) };
     }
 
     if (event.httpMethod === 'GET' && event.path?.endsWith('/scores')) {
       const limit = Math.min(100, Math.max(1, Number(event.queryStringParameters?.limit ?? 10)));
+
       const res = await ddb.send(new QueryCommand({
         TableName: TABLE_NAME,
         IndexName: GSI1_NAME,
         KeyConditionExpression: 'gsi1pk = :pk',
         ExpressionAttributeValues: { ':pk': { S: 'RANK' } },
-        ScanIndexForward: false,
+        ScanIndexForward: false, // 降順
         Limit: limit,
       }));
+
       const items = (res.Items ?? []).map(it => ({
         name: it.name?.S ?? '',
         pairs: Number(it.pairs?.N ?? 0),
         seconds: Number(it.seconds?.N ?? 0),
         playedAt: it.playedAt?.S ?? '',
       }));
+
       return { statusCode: 200, headers, body: JSON.stringify(items) };
     }
 
