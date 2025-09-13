@@ -9,7 +9,7 @@ import { scoresFn } from './functions/scores/resource';
 export const backend = defineBackend({ scoresFn });
 
 // 1つの Stack にまとめる
-const apiStack = backend.createStack('api');
+const apiStack = backend.getStack('api');
 
 // --- DynamoDB ---
 const table = new Table(apiStack, 'ScoresTable', {
