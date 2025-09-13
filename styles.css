@@ -1,3 +1,431 @@
+/* 神経衰弱ゲーム スタイルシート */
+
+/* リセットとベーススタイル */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    background: linear-gradient(135deg, #d2c9a4 0%, #b4ae8d 100%);
+    background-image: url('./images/background-image.v1.png');
+    min-height: 100vh;
+    color: #333;
+}
+
+.countdown {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 8rem;
+    font-weight: bold;
+    z-index: 2000;
+    transition: opacity 0.5s ease;
+    font-family: "Bungee", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.countdown.hidden {
+    display: none;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ヘッダースタイル */
+.game-header {
+    text-align: center;
+    margin-bottom: 30px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.game-header h1 {
+    font-size: 2.5rem;
+    color: #4a5568;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: "Dela Gothic One", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.start-button {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+}
+
+.start-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(238, 90, 36, 0.6);
+}
+
+.start-button:active {
+    transform: translateY(0);
+}
+
+.game-info {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.timer,
+.score {
+    background: rgba(74, 85, 104, 0.1);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #4a5568;
+}
+
+/* 名前入力欄スタイル */
+.player-name-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.player-name-input label {
+    font-weight: bold;
+    color: #4a5568;
+    font-size: 1.1rem;
+}
+
+.player-name-input input {
+    padding: 10px 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.player-name-input input:focus {
+    border-color: #74b9ff;
+    box-shadow: 0 0 0 3px rgba(116, 185, 255, 0.2);
+}
+
+/* カードグリッドスタイル */
+.game-area {
+    margin-bottom: 40px;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 180px);
+    grid-template-rows: repeat(4, 240px);
+    gap: 15px;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+/* カードスタイル */
+.card {
+    width: 180px;
+    height: 240px;
+    position: relative;
+    cursor: pointer;
+    perspective: 1000px;
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s ease-in-out;
+    transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.card-front {
+    background: linear-gradient(135deg, #cbcda4, #a9a16c);
+    background-image: url('images/front-face.v1.png');
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-back {
+    transform: rotateY(180deg);
+    background: white;
+}
+
+.card-front img,
+.card-back img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px;
+}
+
+.card.matched {
+    opacity: 0.7;
+    transform: scale(0.95);
+}
+
+.card:hover:not(.flipped):not(.matched) {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* ランキングセクション */
+.ranking-section {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.ranking-section h2 {
+    text-align: center;
+    color: #4a5568;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.ranking-list {
+    max-height: 1000px;
+    overflow-y: auto;
+}
+
+.ranking-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: rgba(116, 185, 255, 0.1);
+    border-radius: 10px;
+    border-left: 4px solid #74b9ff;
+}
+
+.ranking-item:first-child {
+    background: rgba(255, 215, 0, 0.2);
+    border-left-color: #ffd700;
+}
+
+.ranking-item:nth-child(2) {
+    background: rgba(192, 192, 192, 0.2);
+    border-left-color: #c0c0c0;
+}
+
+.ranking-item:nth-child(3) {
+    background: rgba(205, 127, 50, 0.2);
+    border-left-color: #cd7f32;
+}
+
+/* モーダルスタイル */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h2 {
+    color: #4a5568;
+    margin-bottom: 20px;
+    font-size: 2rem;
+}
+
+.result-details {
+    margin: 20px 0;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.play-again-button {
+    background: linear-gradient(45deg, #00b894, #00a085);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 184, 148, 0.4);
+}
+
+.play-again-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 184, 148, 0.6);
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 1600px) {
+    .card-grid {
+        grid-template-columns: repeat(8, 160px);
+        grid-template-rows: repeat(4, 210px);
+        gap: 12px;
+    }
+
+    .card {
+        width: 160px;
+        height: 210px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .card-grid {
+        grid-template-columns: repeat(8, 140px);
+        grid-template-rows: repeat(4, 180px);
+        gap: 10px;
+    }
+
+    .card {
+        width: 140px;
+        height: 180px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .card-grid {
+        grid-template-columns: repeat(4, 160px);
+        grid-template-rows: repeat(8, 210px);
+    }
+
+    .card {
+        width: 160px;
+        height: 210px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .game-header h1 {
+        font-size: 2rem;
+    }
+
+    .game-controls {
+        flex-direction: column;
+        gap: 15px;
+        font-family: "Noto Sans JP", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 300;
+        font-style: normal;
+    }
+
+    .player-name-input {
+        flex-direction: column;
+        gap: 5px;
+        text-align: center;
+    }
+
+    .player-name-input input {
+        width: 200px;
+    }
+
+    .card-grid {
+        grid-template-columns: repeat(4, 120px);
+        grid-template-rows: repeat(8, 160px);
+        gap: 8px;
+    }
+
+    .card {
+        width: 120px;
+        height: 160px;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-grid {
+        grid-template-columns: repeat(4, 100px);
+        grid-template-rows: repeat(8, 130px);
+        gap: 6px;
+    }
+
+    .card {
+        width: 100px;
+        height: 130px;
+    }
+
+    .modal-content {
+        padding: 20px;
+        margin: 20px;
+    }
+}
+
+/* どこでも使える非表示ユーティリティ */
+.hidden {
+    display: none !important;
+  }
+
 /* ==== Responsive tidy-up: 8×4(横向き) / 4×8(縦向き) ==== */
 
 /* まず既存の固定サイズを上書き（幅・高さの固定をやめる） */
