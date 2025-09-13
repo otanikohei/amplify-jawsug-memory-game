@@ -1,5 +1,8 @@
 /* 神経衰弱ゲーム スタイルシート */
 
+:root { --card-ratio: 0.68; }   /* デフォルトは縦向きiPhone寄り */
+.card { aspect-ratio: var(--card-ratio); }
+
 /* リセットとベーススタイル */
 * {
     margin: 0;
@@ -146,6 +149,7 @@ body {
 
 .card-grid {
     display: grid;
+    align-content: start; /* ← 中央揃えだと上下に白が残りやすい */
     grid-template-columns: repeat(8, 180px);
     grid-template-rows: repeat(4, 240px);
     gap: 15px;
@@ -454,17 +458,53 @@ body {
   }
 }
 
-/* きつい横向き幅でも 8 列を維持しつつ余白だけ縮める */
-@media (max-width: 1024px) and (orientation: landscape) {
-  .card-grid { gap: clamp(6px, 1vw, 12px); }
+/* レイアウト用の変数。JS が値を入れる */
+:root { --card-w: 100px; }
+
+/* グリッドは上寄せ＆中央寄せ */
+#card-grid {
+  box-sizing: border-box;
+  align-content: start;
+  justify-content: center;
 }
 
-/* 極小画面の保険（縦向きのときだけカードをやや横長にして収まり改善） */
-@media (max-width: 480px) and (orientation: portrait) {
-  .card { aspect-ratio: 2.6 / 4; }
+/* カードは計算された幅・比率で描画（flip用の中身はそのままでOK） */
+.card {
+  width: var(--card-w);
+  aspect-ratio: 3 / 4; /* お好みで 2.8/4〜3/4 程度に */
 }
 
-/* CloudFront運用時の404回避：CSSの表面画像は使わない（JSの<img>に任せる） */
-.card-front {
-  background-image: none !important;
+.card-inner, .card-front, .card-back {
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== 行の固定高さを無効化し、カードはセル幅にフィット ===== */
+#card-grid {
+  /* 既存の grid-template-rows: repeat(..., xxxpx); を丸ごと無効化 */
+  grid-template-rows: unset !important;
+  /* 以降は暗黙の行(implicit rows)にする */
+  grid-auto-rows: auto !important;
+
+  /* 余白の出方を安定させる */
+  align-content: start;
+  justify-content: center;
+}
+
+/* カードはセル幅でサイズを決め、高さはアスペクト比で出す */
+.card {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 3 / 4;  /* お好みで 2.9/4 〜 3/4 などに微調整可 */
+}
+
+/* 画像はカード内でぴったり埋まる */
+.card-inner, .card-front, .card-back {
+  width: 100%;
+  height: 100%;
+}
+.card-front img, .card-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }

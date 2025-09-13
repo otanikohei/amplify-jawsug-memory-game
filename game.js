@@ -123,6 +123,8 @@ class GameController {
 
       // カード生成
       this.cardManager.generateCards();
+      // カード生成直後にぴったりレイアウト
+      if (window.fitGridToViewport) window.fitGridToViewport();
 
       // タイマー開始
       this.timerManager.start(
@@ -633,3 +635,65 @@ document.addEventListener('DOMContentLoaded', () => {
   // CSSの相対パスを無視して CloudFront の背景を強制適用
   document.body.style.backgroundImage = `url('${bgUrl}')`;
 });
+
+
+// ====== 画面にピッタリ収めるレイアウト ======
+(() => {
+  const ASPECT = 3 / 4; // .card の aspect-ratio と必ず一致させる
+  let raf = 0;
+
+  function fitGridToViewport() {
+    const grid = document.getElementById('card-grid');
+    if (!grid || grid.classList.contains('hidden')) return;
+
+    // 端末の向きで列数/行数を決定
+    const isLandscape = matchMedia('(orientation: landscape)').matches;
+    const cols = isLandscape ? 8 : 4;
+    const rows = isLandscape ? 4 : 8;
+
+    // 現在の gap / padding を取得
+    const cs = getComputedStyle(grid);
+    const gap = parseFloat(cs.gap) || 8;
+    const padL = parseFloat(cs.paddingLeft) || 0;
+    const padR = parseFloat(cs.paddingRight) || 0;
+    const padT = parseFloat(cs.paddingTop) || 0;
+    const padB = parseFloat(cs.paddingBottom) || 0;
+
+    // 横幅制約：列数とギャップから出る最大カード幅
+    const availW = grid.clientWidth - padL - padR - gap * (cols - 1);
+    const maxCardW_ByWidth = availW / cols;
+
+    // 高さ制約：行数とギャップから出る最大カード幅（高さ→幅に変換）
+    const availH = window.innerHeight - padT - padB - gap * (rows - 1);
+    const maxCardH_ByHeight = availH / rows;
+    const maxCardW_ByHeight = maxCardH_ByHeight * ASPECT;
+
+    // どちらにも収まる幅にする（下限40pxで保険）
+    const cardW = Math.floor(Math.max(40, Math.min(maxCardW_ByWidth, maxCardW_ByHeight)));
+
+    // CSS変数と列テンプレートを更新（!importantで既存の!importantも潰す）
+    document.documentElement.style.setProperty('--card-w', `${cardW}px`);
+    grid.style.setProperty('grid-template-columns', `repeat(${cols}, ${cardW}px)`, 'important');
+
+    // 既存の fitGridToViewport() の終わり付近、cardW を計算した直後に追加
+    grid.style.setProperty('grid-template-rows', 'unset', 'important'); // 明示行を無効化
+    grid.style.setProperty('grid-auto-rows', `${Math.round(cardW / ASPECT)}px`, 'important'); // 行高さ=カード高さ
+
+  }
+
+  // スロットリングして安定させる
+  function scheduleFit() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(fitGridToViewport);
+  }
+
+  // グローバルに1回だけバインド（重複防止）
+  if (!window.__gridFitBound) {
+    window.__gridFitBound = true;
+    addEventListener('resize', scheduleFit, { passive: true });
+    addEventListener('orientationchange', scheduleFit, { passive: true });
+  }
+
+  // 外から呼べるように公開
+  window.fitGridToViewport = scheduleFit;
+})();
