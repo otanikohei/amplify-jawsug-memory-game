@@ -4,7 +4,7 @@
 
 // ====== API 設定（Amplify の API Gateway の URL を設定）======
 // 例: https://abc123.execute-api.ap-northeast-1.amazonaws.com/prod
-const API_BASE = ''; // ← 空のままだとローカル保存にフォールバックします
+const API_BASE = 'https://s021ys8qh3.execute-api.ap-northeast-1.amazonaws.com/prod/'; // ← 空のままだとローカル保存にフォールバックします
 
 // ====== ゲーム設定 ======
 const GAME_CONFIG = {
