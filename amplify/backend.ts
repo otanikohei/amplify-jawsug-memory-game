@@ -83,6 +83,7 @@ const imagesCache = new CachePolicy(cdnStack, 'ImagesCachePolicy', {
 // 必要に応じて CORS/セキュリティヘッダ（Canvas 等に使う予定がなければ省略可）
 const imagesHeaders = new ResponseHeadersPolicy(cdnStack, 'ImagesHeaders', {
   corsBehavior: {
+    accessControlAllowCredentials: false, // ★追加（必須）
     accessControlAllowOrigins: ['*'],
     accessControlAllowHeaders: ['*'],
     accessControlAllowMethods: ['GET', 'HEAD', 'OPTIONS'],
