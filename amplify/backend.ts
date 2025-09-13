@@ -1,22 +1,27 @@
-// amplify/backend.ts
 import { defineBackend } from '@aws-amplify/backend';
 import { RemovalPolicy, CfnOutput } from 'aws-cdk-lib';
 import { AttributeType, BillingMode, ProjectionType, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { scoresFn } from './functions/scores/resource';
 
-// 既存の data 等があるなら { data, scoresFn } と一緒にここへ
 export const backend = defineBackend({ scoresFn });
 
-// 1つの Stack にまとめる
-const apiStack = backend.getStack('api');
+/**
+ * スタック構成：
+ *   dbStack   … DynamoDB（← Function スタックが参照）
+ *   apiStack  … API Gateway（← Function スタックを参照）
+ *   function  … scoresFn（デフォルトの関数スタック）
+ */
 
-// --- DynamoDB ---
-const table = new Table(apiStack, 'ScoresTable', {
+// --- DB スタック（DynamoDB だけ置く）---
+const dbStack = backend.createStack('db');
+
+const table = new Table(dbStack, 'ScoresTable', {
   partitionKey: { name: 'id', type: AttributeType.STRING },
   billingMode: BillingMode.PAY_PER_REQUEST,
   removalPolicy: RemovalPolicy.RETAIN,
 });
+
 table.addGlobalSecondaryIndex({
   indexName: 'gsi1',
   partitionKey: { name: 'gsi1pk', type: AttributeType.STRING },
@@ -24,12 +29,14 @@ table.addGlobalSecondaryIndex({
   projectionType: ProjectionType.ALL,
 });
 
-// Lambda 権限 & 環境変数
+// Lambda に権限と環境変数を付与（これは “Function スタック側” にポリシー等が乗る）
 table.grantReadWriteData(backend.scoresFn.resources.lambda);
 backend.scoresFn.addEnvironment('TABLE_NAME', table.tableName);
 backend.scoresFn.addEnvironment('GSI1_NAME', 'gsi1');
 
-// --- API Gateway (REST v1) ---
+// --- API スタック（RestApi だけ置く）---
+const apiStack = backend.createStack('api');
+
 const api = new RestApi(apiStack, 'ScoresApi', {
   restApiName: 'scores-api',
   defaultCorsPreflightOptions: {
@@ -38,11 +45,12 @@ const api = new RestApi(apiStack, 'ScoresApi', {
     allowHeaders: Cors.DEFAULT_HEADERS,
   },
 });
+
 const scores = api.root.addResource('scores');
 const scoresInteg = new LambdaIntegration(backend.scoresFn.resources.lambda);
-scores.addMethod('GET', scoresInteg);
+scores.addMethod('GET',  scoresInteg);
 scores.addMethod('POST', scoresInteg);
 
-// ★ これがあると Amplify の Backend Outputs に URL が必ず出ます
+// 出力（Amplify Backend → Outputs に出ます）
 new CfnOutput(apiStack, 'ScoresApiId',  { value: api.restApiId });
-new CfnOutput(apiStack, 'ScoresApiUrl', { value: api.url ?? '' }); // 末尾に / が付くことあり
+new CfnOutput(apiStack, 'ScoresApiUrl', { value: api.url ?? '' });
