@@ -3,18 +3,24 @@ backend:
   phases:
     build:
       commands:
-        - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
-        # （任意）フロントで amplify_outputs.json を使うなら ↓ を追加
-        # - npx ampx generate outputs --branch $AWS_BRANCH --app-id $AWS_APP_ID
+        - node -v
+        - npm -v
+        # 依存がある場合のみ。なければ省略可
+        - npm ci --no-audit --no-fund || true
+        # ← ここを ampx ではなく backend-cli を直接指定
+        - npx -y @aws-amplify/backend-cli@latest pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID --outputs-out-dir ./
+  artifacts:
+    baseDirectory: .
+    files:
+      - amplify_outputs.json
+
 frontend:
   phases:
-    preBuild:
-      commands: []
     build:
-      commands: []
+      commands:
+        # フロントが静的ならビルドは不要。ビルドがあるなら npm run build 等に変更
+        - echo "no frontend build step"
   artifacts:
-    baseDirectory: /
+    baseDirectory: .
     files:
       - '**/*'
-  cache:
-    paths: []
