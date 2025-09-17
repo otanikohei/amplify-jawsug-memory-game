@@ -4,8 +4,8 @@
 
 // ====== API 設定（Amplify の API Gateway の URL を設定）======
 // 例: https://abc123.execute-api.ap-northeast-1.amazonaws.com/prod/
-const API_BASE = 'https://s021ys8qh3.execute-api.ap-northeast-1.amazonaws.com/prod'; // ← 空のままだとローカル保存にフォールバックします
-const IMG_BASE    = 'https://d3ftybotpd13g3.cloudfront.net'; // ImagesCdnUrl（末尾スラ無し）
+const API_BASE = 'https://ltas4vm087.execute-api.ap-northeast-1.amazonaws.com/prod'; // ← 空のままだとローカル保存にフォールバックします
+const IMG_BASE    = 'https://dbsjr2kv1sqox.cloudfront.net'; // ImagesCdnUrl（末尾スラ無し）
 const IMG_PREFIX  = '';      // 例: 'images/' に置いたなら 'images/' にする
 const IMG_VERSION = 'v1';    // 例: バージョン無しなら '' にする
 const USE_PADDED  = true;   // 01.png 形式なら true、1.png 形式なら false
