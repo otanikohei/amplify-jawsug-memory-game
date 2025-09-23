@@ -51,7 +51,7 @@ body {
 /* ヘッダースタイル */
 .game-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
     background: rgba(255, 255, 255, 0.9);
     padding: 20px;
     border-radius: 15px;
@@ -144,6 +144,7 @@ body {
 
 /* カードグリッドスタイル */
 .game-area {
+    margin-top: 5px;
     margin-bottom: 40px;
 }
 
@@ -154,7 +155,7 @@ body {
     grid-template-rows: repeat(4, 240px);
     gap: 15px;
     justify-content: center;
-    padding: 20px;
+    padding: 15px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     backdrop-filter: blur(10px);
